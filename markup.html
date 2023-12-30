@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <link rel="shortcut icon" href="#">
+    <style>
+        html, body {
+            margin: 0;
+            height: 100%;
+            width: 100%;
+            overflow: hidden;
+            border: 0;
+        }
+        canvas {
+            display: block;
+            background-color: hsl( 0, 0%, 0%);
+            position: absolute;
+            left: 50px;
+            top: 20px;
+        }
+    </style>
+  </head>
+  <body>
+    <canvas id="myCanvas" tabindex="0"></canvas>
+    <script src="Canvas.js"></script>
+    <script>
+//////////////////////////////////////////////////////////////
+        if( 0 ){
+        } else {
+            const canvas = new Avontage.Canvas( "myCanvas" );
+            const a = new Avontage.MsgBox( 50, 40, canvas );
+            canvas.push( a );
+            const b = new Avontage.Box( 100, 100, canvas )
+                                  .Bgr( "#a24" )
+                                  .Width( 200 )
+                                  .Height( 200 );
+            canvas.push( b );
+            canvas.render();
+        }
+    </script>
+  </body>
+</html>
+<!--
+-->
