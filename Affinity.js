@@ -6,6 +6,8 @@
     const DOWN = 0;
     const UP = 1;
     //////////////////////////////////////////////////////////
+    const CREATE = "c";
+    const HUE = "h";
     //////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////
@@ -15,16 +17,18 @@
             this.canvas = canvas;
             this.ctx = canvas.getContext( "2d" );
             this.stk = [];
-            this.backup();
             this.fullScreen();
+            this.backup();
             // add Event Listeners
             this.onWheel();
             this.onKeyDown();
+            this.onKeyUp();
             this.onMouseDown();
             this.onMouseUp();
             this.onMouseMove();
             // flags
             this.flagMouseDown = false;
+            this.flagKeyDown = {};
         }
         getTopBox() {
             const n = this.stk.length;
@@ -34,38 +38,56 @@
             this.canvas.addEventListener( "wheel", e => {
                 const box = this.getTopBox();
                 // negative deltaY is wheel up
-                box.handleEvent( "scaling", e.deltaY < 0 );
+                e = +( e.deltaY < 0 );
+                if( this.flagKeyDown[ HUE ]){
+                    box.handleEvent( "hue", e );     
+                } else {
+                    box.handleEvent( "scaling", e );
+                }
             });
         }
         onKeyDown() {
-            this.canvas.focus(); // tabindex
-            this.canvas.addEventListener( "keydown", e => {
-                const box = this.getTopBox();
+            document.addEventListener( "keydown", e => {
+                this.flagKeyDown[ e.key ] = true;
                 if( e.key == "PageUp" ){
-                    box.handleEvent( "scaling", UP );
-                } else 
-                if( e.key == "PageDown" ){
-                    box.handleEvent( "scaling", DOWN );
+                    this.getTopBox().handleEvent( "scaling", UP );
+                } else if( e.key == "PageDown" ){
+                    this.getTopBox().handleEvent( "scaling", DOWN );
+                }
+            });
+        }
+        onKeyUp() {
+            document.addEventListener( "keyup", e => {
+                this.flagKeyDown[ e.key ] = false;
+                if( e.key == CREATE ){
+                    // figure out negative dimensions
+                    this.getTopBox().bePositive();
                 }
             });
         }
         onMouseDown() {
             this.canvas.addEventListener( "mousedown", e => {
-                let j = this.stk.length - 1;
-                for(; j >= 0; --j ){
-                    const box = this.stk[j];
-                    if( box.handleEvent( "mousedown", e )){
-                        break;
+                // activate the lasers
+                this.flagMouseDown = true;
+                //
+                if( this.flagKeyDown[ CREATE ]){
+                    this.stk.push( new Box( e.x, e.y, this ));
+                } else {
+                    let j = this.stk.length - 1;
+                    for(; j >= 0; --j ){
+                        const box = this.stk[j];
+                        if( box.handleEvent( "mousedown", e )){
+                            break;
+                        }
                     }
-                }
-                if( j >= 0 ){
-                    // put jth box at the top
-                    const box = this.stk.splice( j, 1 )[ 0 ]; 
-                    this.stk.push( box );
-                    // re-render
-                    this.render();
-                    // activate the lasers
-                    this.flagMouseDown = true;
+                    // j negative here means mouse not within any box
+                    if( j >= 0 ){
+                        // put jth box at the top
+                        const box = this.stk.splice( j, 1 )[ 0 ]; 
+                        this.stk.push( box );
+                        // re-render
+                        this.render();
+                    }
                 }
             });
         }
@@ -80,8 +102,13 @@
         onMouseMove() {
             this.canvas.addEventListener( "mousemove", e => {
                 if( this.flagMouseDown ){
-                    const box = this.getTopBox();
-                    box.handleEvent( "traveling", e );
+                    if( this.flagKeyDown[ CREATE ]){
+                        this.getTopBox()
+                            .handleEvent( "construction", e );
+                    } else {
+                        this.getTopBox()
+                            .handleEvent( "traveling", e );
+                    }
                 } else {
                     this.stk.forEach( box => {
                        box.handleEvent( "mousemove", e );
@@ -136,7 +163,34 @@
     //////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////
+    function mod( n, d ){
+        return (( n % d ) + d ) % d;
+    }
     //////////////////////////////////////////////////////////
+    class Color {
+        constructor( hue, sat, val ){
+            this.hue = hue;
+            this.sat = sat;
+            this.val = val;
+        }
+        get hsl() {
+            return( "hsl(" + this._hue + "," +
+                           + this._sat + "%," +
+                           + this._val + "%)" );
+        }
+        get hue() {
+            return this._hue;
+        }
+        set hue( hue ){
+            this._hue = mod( hue, 360 );
+        }
+        set sat( sat ){
+            this._sat = mod( sat, 101 );
+        }
+        set val( val ){
+            this._val = mod( val, 101 );
+        }
+    }
     //////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////
@@ -153,6 +207,8 @@
     const SCALEUP = 1.4;
     const SCALEDOWN = 1 / SCALEUP;
     //////////////////////////////////////////////////////////
+    const HUESTEP = 10;
+    const HUEINC = [ -HUESTEP, HUESTEP ];
     //////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////
@@ -166,17 +222,19 @@
             this.sketch.height = canvas.getHeight();
             this.ctx = this.sketch.getContext( "2d" );
             this.handler = {
-                "mousedown": this.handleMouseDown,
-                "mousemove": this.handleMouseMove,
-                "traveling": this.handleTraveling,
-                "scaling":   this.handleScaling,
+                "mousedown":    this.handleMouseDown,
+                "mousemove":    this.handleMouseMove,
+                "traveling":    this.handleTraveling,
+                "scaling":      this.handleScaling,
+                "construction": this.handleConstruction,
+                "hue":          this.handleHue,
             };
             this.mouseX = 0;
             this.mouseY = 0;
             // optional attributes
             this.Width( 100 );
             this.Height( 50 );
-            this.Bgr( "#22a");
+            this.Color( 0, 100, 60 );
         }
         Width( width ){
             this.width = width;
@@ -186,9 +244,24 @@
             this.height = height;
             return this;
         }
-        Bgr( bgr ){
-            this.bgr = bgr;
-            this.ctx.fillStyle = bgr;
+        Color( hue, sat, val ){
+            this.color = new Color( hue, sat, val );
+            this.ctx.fillStyle = this.color.hsl;
+            return this;
+        }
+        Hue( hue ){
+            this.color.hue = hue; 
+            this.ctx.fillStyle = this.color.hsl;
+            return this;
+        }
+        Sat( sat ){
+            this.color.sat = sat;
+            this.ctx.fillStyle = this.color.hsl;
+            return this;
+        }
+        Val( val ){
+            this.color.val = val;
+            this.ctx.fillStyle = this.color.hsl;
             return this;
         }
         clear() {
@@ -219,11 +292,7 @@
             this.mouseY = e.y;
             return this.mouseInsideBoxCheck( e );
         }
-        handleMouseMove = e => {
-            if( this.mouseInsideBoxCheck( e )){
-                console.log( e.x, e.y );
-            }
-        }
+        handleMouseMove = e => {}
         travel( dx, dy ){
             this.x += dx;
             this.y += dy;
@@ -246,39 +315,47 @@
         }
         handleScaling = e => {
             this.clear();
-            const factor = e == DOWN ? SCALEDOWN : SCALEUP;
+            const factor = e ? SCALEUP : SCALEDOWN;
             this.scale( factor );
             this.canvas.render();
         }
-    }
-    ////////////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////
-    class MsgBox extends Box {
-        travel( dx, dy ){
-            super.travel( dx, dy );
-            console.log( "msg box" );
+        handleHue = e => {
+            this.clear();
+            this.Hue( this.color.hue + HUEINC[ e ] );
+            this.canvas.render();
+        }
+        handleConstruction = e => {
+            this.clear();
+            this.width = e.x - this.x;
+            this.height = e.y - this.y;
+            this.canvas.render();
+        }
+        bePositive() {
+            if( this.width < 0 ){
+                this.x += this.width;
+                this.width = -this.width;
+            }
+            if( this.height < 0 ){
+                this.y += this.height;
+                this.height = -this.height;
+            }
         }
     }
     ////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////
-    this.Avontage = {
+    ////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////
+    this.Affinity = {
         Canvas: Canvas,
         Box: Box,
-        MsgBox: MsgBox,
     };
 }());
 ////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////
-// log: + test with more boxes
-//      + write helper func for getting active box( stk[-1] )
-//      + move to msgbox
-//      + after each box nadle event tha canvas is calling
-//        this.render, better pass canvas and let boxes call
-//        canvas.render
-//      + change w and h to width and height
+// log:

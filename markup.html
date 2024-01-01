@@ -20,20 +20,20 @@
     </style>
   </head>
   <body>
-    <canvas id="myCanvas" tabindex="0"></canvas>
-    <script src="Canvas.js"></script>
+    <canvas id="myCanvas"></canvas>
+    <script src="Affinity.js"></script>
     <script>
 //////////////////////////////////////////////////////////////
         if( 0 ){
         } else {
-            const canvas = new Avontage.Canvas( "myCanvas" );
-            const a = new Avontage.MsgBox( 50, 40, canvas );
-            canvas.push( a );
-            const b = new Avontage.Box( 100, 100, canvas )
-                                  .Bgr( "#a24" )
+            const canvas = new Affinity.Canvas( "myCanvas" );
+            const a = new Affinity.Box( 50, 40, canvas )
                                   .Width( 200 )
-                                  .Height( 200 );
-            canvas.push( b );
+                                  .Height( 150 )
+                                  .Hue( 20 )
+                                  .Sat( 80 )
+                                  .Val( 20 );
+            canvas.push( a );
             canvas.render();
         }
     </script>
