@@ -7,7 +7,9 @@
     const UP = 1;
     //////////////////////////////////////////////////////////
     const CREATE = "c";
-    const HUE = "h";
+    const HUE =    "h";
+    const SAT =    "s";
+    const VAL =    "v";
     //////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////
@@ -41,7 +43,12 @@
                 e = +( e.deltaY < 0 );
                 if( this.flagKeyDown[ HUE ]){
                     box.handleEvent( "hue", e );     
-                } else {
+                } else if( this.flagKeyDown[ SAT ]){
+                    box.handleEvent( "sat", e );
+                } else if( this.flagKeyDown[ VAL ]){
+                    box.handleEvent( "val", e );
+                }
+                else {
                     box.handleEvent( "scaling", e );
                 }
             });
@@ -181,6 +188,12 @@
         get hue() {
             return this._hue;
         }
+        get sat() {
+            return this._sat;
+        }
+        get val() {
+            return this._val;
+        }
         set hue( hue ){
             this._hue = mod( hue, 360 );
         }
@@ -207,10 +220,14 @@
     const SCALEUP = 1.4;
     const SCALEDOWN = 1 / SCALEUP;
     //////////////////////////////////////////////////////////
-    const HUESTEP = 10;
-    const HUEINC = [ -HUESTEP, HUESTEP ];
+    const STEPHUE = 10;
+    const INCHUE = [ -STEPHUE, STEPHUE ];
     //////////////////////////////////////////////////////////
+    const STEPSAT = 5;
+    const INCSAT = [ -STEPSAT, STEPSAT ];
     //////////////////////////////////////////////////////////
+    const STEPVAL = 5;
+    const INCVAL = [ -STEPVAL, STEPVAL ];
     //////////////////////////////////////////////////////////
     class Box {
         constructor( x, y, canvas ){
@@ -228,6 +245,8 @@
                 "scaling":      this.handleScaling,
                 "construction": this.handleConstruction,
                 "hue":          this.handleHue,
+                "sat":          this.handleSat,
+                "val":          this.handleVal,
             };
             this.mouseX = 0;
             this.mouseY = 0;
@@ -321,7 +340,17 @@
         }
         handleHue = e => {
             this.clear();
-            this.Hue( this.color.hue + HUEINC[ e ] );
+            this.Hue( this.color.hue + INCHUE[ e ] );
+            this.canvas.render();
+        }
+        handleSat = e => {
+            this.clear();
+            this.Sat( this.color.sat + INCSAT[ e ]);
+            this.canvas.render();
+        }
+        handleVal = e => {
+            this.clear();
+            this.Val( this.color.val + INCVAL[ e ]);
             this.canvas.render();
         }
         handleConstruction = e => {
