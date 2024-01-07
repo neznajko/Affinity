@@ -15,12 +15,10 @@
     //////////////////////////////////////////////////////////
     class Canvas {
         constructor( name ){
-            const canvas = document.getElementById( name );
-            this.canvas = canvas;
-            this.ctx = canvas.getContext( "2d" );
+            this.canvas = document.getElementById( name );
+            this.ctx = this.canvas.getContext( "2d" );
             this.stk = [];
             this.fullScreen();
-            this.backup();
             // add Event Listeners
             this.onWheel();
             this.onKeyDown();
@@ -30,43 +28,45 @@
             this.onMouseMove();
             // flags
             this.flagMouseDown = false;
-            this.flagKeyDown = {};
+            this.toggle = {};
         }
         getTopBox() {
-            const n = this.stk.length;
-            return this.stk[ n - 1 ];
+            return this.stk[ this.stk.length - 1 ];
         }
+		_wheel( e ) {
+            const box = this.getTopBox();
+            if( this.toggle[ HUE ]){
+                box.handleEvent( "hue", e );     
+            } else if( this.toggle[ SAT ]){
+                box.handleEvent( "sat", e );
+            } else if( this.toggle[ VAL ]){
+                box.handleEvent( "val", e );
+            } else {
+                box.handleEvent( "scaling", e );
+            }
+		}
         onWheel() {
             this.canvas.addEventListener( "wheel", e => {
-                const box = this.getTopBox();
                 // negative deltaY is wheel up
-                e = +( e.deltaY < 0 );
-                if( this.flagKeyDown[ HUE ]){
-                    box.handleEvent( "hue", e );     
-                } else if( this.flagKeyDown[ SAT ]){
-                    box.handleEvent( "sat", e );
-                } else if( this.flagKeyDown[ VAL ]){
-                    box.handleEvent( "val", e );
-                }
-                else {
-                    box.handleEvent( "scaling", e );
-                }
+				this._wheel( +( e.deltaY < 0 ));
             });
         }
         onKeyDown() {
             document.addEventListener( "keydown", e => {
-                this.flagKeyDown[ e.key ] = true;
-                if( e.key == "PageUp" ){
-                    this.getTopBox().handleEvent( "scaling", UP );
-                } else if( e.key == "PageDown" ){
-                    this.getTopBox().handleEvent( "scaling", DOWN );
-                }
+				const key = e.key;
+				// set to false if undefined
+				if(! key in this.toggle ){
+					this.toggle[ key ] = false;
+				}
+                if( key == "PageUp" || key == "PageDown" ){
+					this._wheel( +( key == "PageUp" ));
+                } 
             });
         }
         onKeyUp() {
             document.addEventListener( "keyup", e => {
-                this.flagKeyDown[ e.key ] = false;
-                if( e.key == CREATE ){
+				this.toggle[ e.key ] = !this.toggle[ e.key ];
+                if( e.key == CREATE && !this.toggle[ e.key ]){
                     // figure out negative dimensions
                     this.getTopBox().bePositive();
                 }
@@ -77,7 +77,7 @@
                 // activate the lasers
                 this.flagMouseDown = true;
                 //
-                if( this.flagKeyDown[ CREATE ]){
+                if( this.toggle[ CREATE ]){
                     this.stk.push( new Box( e.x, e.y, this ));
                 } else {
                     let j = this.stk.length - 1;
@@ -87,7 +87,7 @@
                             break;
                         }
                     }
-                    // j negative here means mouse not within any box
+                    // j negative means mouse not within any box
                     if( j >= 0 ){
                         // put jth box at the top
                         const box = this.stk.splice( j, 1 )[ 0 ]; 
@@ -109,7 +109,7 @@
         onMouseMove() {
             this.canvas.addEventListener( "mousemove", e => {
                 if( this.flagMouseDown ){
-                    if( this.flagKeyDown[ CREATE ]){
+                    if( this.toggle[ CREATE ]){
                         this.getTopBox()
                             .handleEvent( "construction", e );
                     } else {
@@ -125,6 +125,7 @@
         }
         //////////////////////////////////////////////////////
         fullScreen() {
+			this.backup();
             this.changeBoundingBox
             ( 0, 0, window.innerWidth, window.innerHeight ); 
         }
