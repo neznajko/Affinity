@@ -33,7 +33,7 @@
         getTopBox() {
             return this.stk[ this.stk.length - 1 ];
         }
-		_wheel( e ) {
+        _wheel( e ) {
             const box = this.getTopBox();
             if( this.toggle[ HUE ]){
                 box.handleEvent( "hue", e );     
@@ -44,28 +44,28 @@
             } else {
                 box.handleEvent( "scaling", e );
             }
-		}
+        }
         onWheel() {
             this.canvas.addEventListener( "wheel", e => {
                 // negative deltaY is wheel up
-				this._wheel( +( e.deltaY < 0 ));
+                this._wheel( +( e.deltaY < 0 ));
             });
         }
         onKeyDown() {
             document.addEventListener( "keydown", e => {
-				const key = e.key;
-				// set to false if undefined
-				if(! key in this.toggle ){
-					this.toggle[ key ] = false;
-				}
+                const key = e.key;
+                // set to false if undefined
+                if(! key in this.toggle ){
+                    this.toggle[ key ] = false;
+                }
                 if( key == "PageUp" || key == "PageDown" ){
-					this._wheel( +( key == "PageUp" ));
+                    this._wheel( +( key == "PageUp" ));
                 } 
             });
         }
         onKeyUp() {
             document.addEventListener( "keyup", e => {
-				this.toggle[ e.key ] = !this.toggle[ e.key ];
+                this.toggle[ e.key ] = !this.toggle[ e.key ];
                 if( e.key == CREATE && !this.toggle[ e.key ]){
                     // figure out negative dimensions
                     this.getTopBox().bePositive();
@@ -125,7 +125,7 @@
         }
         //////////////////////////////////////////////////////
         fullScreen() {
-			this.backup();
+            this.backup();
             this.changeBoundingBox
             ( 0, 0, window.innerWidth, window.innerHeight ); 
         }
