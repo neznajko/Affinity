@@ -10,6 +10,7 @@
     const HUE =    "h";
     const SAT =    "s";
     const VAL =    "v";
+    const ROTATE = "r";
     //////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////
@@ -41,6 +42,8 @@
                 box.handleEvent( "sat", e );
             } else if( this.toggle[ VAL ]){
                 box.handleEvent( "val", e );
+            } else if( this.toggle[ ROTATE ]){
+                box.handleEvent( "rotation", e );
             } else {
                 box.handleEvent( "scaling", e );
             }
@@ -230,10 +233,14 @@
     const STEPVAL = 5;
     const INCVAL = [ -STEPVAL, STEPVAL ];
     //////////////////////////////////////////////////////////
+    const STEPROTATE = 5 * Math.PI / 180;
+    const INCROTATE = [ -STEPROTATE, STEPROTATE ];
+    //////////////////////////////////////////////////////////
     class Box {
         constructor( x, y, canvas ){
             this.x = x;
             this.y = y;
+            this.angle = 0;
             this.canvas = canvas;
             this.sketch = document.createElement( "canvas" );
             this.sketch.width = canvas.getWidth();
@@ -244,6 +251,7 @@
                 "mousemove":    this.handleMouseMove,
                 "traveling":    this.handleTraveling,
                 "scaling":      this.handleScaling,
+                "rotation":     this.handleRotation,
                 "construction": this.handleConstruction,
                 "hue":          this.handleHue,
                 "sat":          this.handleSat,
@@ -289,8 +297,10 @@
             ( 0, 0, this.sketch.width, this.sketch.height );
         }
         render() {
-            this.ctx.fillRect
-                 ( this.x, this.y, this.width, this.height );
+            this.ctx.translate( this.x, this.y );
+            this.ctx.rotate( this.angle );
+            this.ctx.fillRect( 0, 0, this.width, this.height );
+            this.ctx.resetTransform();
             return this.sketch;
         }
         handleEvent( type, e ){
@@ -299,10 +309,15 @@
             }
         }
         mouseInsideBoxCheck( e ){
-            return( e.x >= this.x &&
-                    e.x <= this.x + this.width &&
-                    e.y >= this.y &&
-                    e.y <= this.y + this.height );
+            const x = e.x - this.x;
+            const y = e.y - this.y;
+            const a = this.angle;
+            const c = Math.cos( a );
+            const s = Math.sin( a );
+            const u =  c * x + s * y;
+            const v = -s * x + c * y;
+            return( u >= 0 && u <= this.width &&
+                    v >= 0 && v <= this.height );
         }
         // here use arrow methods so this will point to this
         // object not this function after evaluating from
@@ -317,12 +332,17 @@
             this.x += dx;
             this.y += dy;
         }
-        scale( factor, px=this.x, py=this.y ){
+        scale( factor ){
             this.width *= factor;
             this.height *= factor;
-            const dx = ( 1 - factor )*( px - this.x );
-            const dy = ( 1 - factor )*( py - this.y );
-            this.travel( dx, dy );
+        }
+        rotate( angle ){
+            this.angle += angle;
+        }
+        handleRotation = e => {
+            this.clear();
+            this.rotate( INCROTATE[ e ]);
+            this.canvas.render();
         }
         handleTraveling = e => {
             this.clear();
