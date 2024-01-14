@@ -11,6 +11,8 @@
     const SAT =    "s";
     const VAL =    "v";
     const ROTATE = "r";
+    const HEIGHT = "x";
+    const WIDTH =  "y";
     //////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////
@@ -44,6 +46,10 @@
                 box.handleEvent( "val", e );
             } else if( this.toggle[ ROTATE ]){
                 box.handleEvent( "rotation", e );
+            } else if( this.toggle[ WIDTH ]){
+                box.handleEvent( "width", e );
+            } else if( this.toggle[ HEIGHT ]){
+                box.handleEvent( "height", e );
             } else {
                 box.handleEvent( "scaling", e );
             }
@@ -251,6 +257,8 @@
                 "mousemove":    this.handleMouseMove,
                 "traveling":    this.handleTraveling,
                 "scaling":      this.handleScaling,
+                "width":        this.handleWidth,
+                "height":       this.handleHeight,
                 "rotation":     this.handleRotation,
                 "construction": this.handleConstruction,
                 "hue":          this.handleHue,
@@ -332,9 +340,9 @@
             this.x += dx;
             this.y += dy;
         }
-        scale( factor ){
-            this.width *= factor;
-            this.height *= factor;
+        scale( factorW, factorH ){
+            this.width *= factorW;
+            this.height *= factorH;
         }
         rotate( angle ){
             this.angle += angle;
@@ -356,7 +364,19 @@
         handleScaling = e => {
             this.clear();
             const factor = e ? SCALEUP : SCALEDOWN;
-            this.scale( factor );
+            this.scale( factor, factor );
+            this.canvas.render();
+        }
+        handleWidth = e => {
+            this.clear();
+            const factor = e ? SCALEUP : SCALEDOWN;
+            this.scale( factor, 1 );
+            this.canvas.render();
+        }
+        handleHeight = e => {
+            this.clear();
+            const factor = e ? SCALEUP : SCALEDOWN;
+            this.scale( 1, factor );
             this.canvas.render();
         }
         handleHue = e => {
