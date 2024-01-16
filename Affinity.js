@@ -25,7 +25,6 @@
             // add Event Listeners
             this.onWheel();
             this.onKeyDown();
-            this.onKeyUp();
             this.onMouseDown();
             this.onMouseUp();
             this.onMouseMove();
@@ -66,15 +65,11 @@
                 if( key == "PageUp" || key == "PageDown" ){
                     this._wheel( +( key == "PageUp" ));
                 } else {
+                    if( this.toggle == CREATE ){
+                        // figure out negative dimensions
+                        this.getTopBox().bePositive();
+                    }
                     this.toggle = key;
-                }
-            });
-        }
-        onKeyUp() {
-            document.addEventListener( "keyup", e => {
-                if( e.key == CREATE ){
-                    // figure out negative dimensions
-                    this.getTopBox().bePositive();
                 }
             });
         }
