@@ -11,8 +11,8 @@
     const SAT =    "s";
     const VAL =    "v";
     const ROTATE = "r";
-    const HEIGHT = "x";
-    const WIDTH =  "y";
+    const WIDTH =  "x";
+    const HEIGHT = "y";
     //////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////
@@ -31,24 +31,24 @@
             this.onMouseMove();
             // flags
             this.flagMouseDown = false;
-            this.toggle = {};
+            this.toggle = "";
         }
         getTopBox() {
             return this.stk[ this.stk.length - 1 ];
         }
         _wheel( e ) {
             const box = this.getTopBox();
-            if( this.toggle[ HUE ]){
+            if( this.toggle == HUE ){
                 box.handleEvent( "hue", e );     
-            } else if( this.toggle[ SAT ]){
+            } else if( this.toggle == SAT ){
                 box.handleEvent( "sat", e );
-            } else if( this.toggle[ VAL ]){
+            } else if( this.toggle == VAL ){
                 box.handleEvent( "val", e );
-            } else if( this.toggle[ ROTATE ]){
+            } else if( this.toggle == ROTATE ){
                 box.handleEvent( "rotation", e );
-            } else if( this.toggle[ WIDTH ]){
+            } else if( this.toggle == WIDTH ){
                 box.handleEvent( "width", e );
-            } else if( this.toggle[ HEIGHT ]){
+            } else if( this.toggle == HEIGHT ){
                 box.handleEvent( "height", e );
             } else {
                 box.handleEvent( "scaling", e );
@@ -63,19 +63,16 @@
         onKeyDown() {
             document.addEventListener( "keydown", e => {
                 const key = e.key;
-                // set to false if undefined
-                if(! key in this.toggle ){
-                    this.toggle[ key ] = false;
-                }
                 if( key == "PageUp" || key == "PageDown" ){
                     this._wheel( +( key == "PageUp" ));
-                } 
+                } else {
+                    this.toggle = key;
+                }
             });
         }
         onKeyUp() {
             document.addEventListener( "keyup", e => {
-                this.toggle[ e.key ] = !this.toggle[ e.key ];
-                if( e.key == CREATE && !this.toggle[ e.key ]){
+                if( e.key == CREATE ){
                     // figure out negative dimensions
                     this.getTopBox().bePositive();
                 }
@@ -86,7 +83,7 @@
                 // activate the lasers
                 this.flagMouseDown = true;
                 //
-                if( this.toggle[ CREATE ]){
+                if( this.toggle == CREATE ){
                     this.stk.push( new Box( e.x, e.y, this ));
                 } else {
                     let j = this.stk.length - 1;
@@ -118,7 +115,7 @@
         onMouseMove() {
             this.canvas.addEventListener( "mousemove", e => {
                 if( this.flagMouseDown ){
-                    if( this.toggle[ CREATE ]){
+                    if( this.toggle == CREATE ){
                         this.getTopBox()
                             .handleEvent( "construction", e );
                     } else {
@@ -227,7 +224,7 @@
     //////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////
-    const SCALEUP = 1.4;
+    const SCALEUP = 1.2;
     const SCALEDOWN = 1 / SCALEUP;
     //////////////////////////////////////////////////////////
     const STEPHUE = 10;
@@ -421,7 +418,6 @@
     ////////////////////////////////////////////////////////////
     this.Affinity = {
         Canvas: Canvas,
-        Box: Box,
     };
 }());
 ////////////////////////////////////////////////////////////////

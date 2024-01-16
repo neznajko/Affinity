@@ -10,12 +10,9 @@
             overflow: hidden;
             border: 0;
         }
-        canvas {
+        #myCanvas {
             display: block;
             background-color: hsl( 0, 0%, 0%);
-            position: absolute;
-            left: 50px;
-            top: 20px;
         }
     </style>
   </head>
@@ -27,14 +24,6 @@
         if( 0 ){
         } else {
             const canvas = new Affinity.Canvas( "myCanvas" );
-            const a = new Affinity.Box( 50, 40, canvas )
-                                  .Width( 200 )
-                                  .Height( 150 )
-                                  .Hue( 20 )
-                                  .Sat( 80 )
-                                  .Val( 20 );
-            canvas.push( a );
-            canvas.render();
         }
     </script>
   </body>
