@@ -24,6 +24,14 @@
         if( 0 ){
         } else {
             const canvas = new Affinity.Canvas( "myCanvas" );
+            const box = new Affinity.Box( 100, 100, canvas );
+            box.Angle( 45 * Math.PI / 180 )
+               .Width( 500 )
+               .Color( 240, 50, 40 )
+               .Height( 250 );
+            canvas.push( box );
+            canvas.render();
+            console.log( JSON.stringify( box.getState()));
         }
     </script>
   </body>

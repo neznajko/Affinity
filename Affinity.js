@@ -238,8 +238,10 @@
         constructor( x, y, canvas ){
             this.x = x;
             this.y = y;
-            this.angle = 0;
             this.canvas = canvas;
+            // private stuff
+            this.mouseX = 0;
+            this.mouseY = 0;
             this.sketch = document.createElement( "canvas" );
             this.sketch.width = canvas.getWidth();
             this.sketch.height = canvas.getHeight();
@@ -257,12 +259,15 @@
                 "sat":          this.handleSat,
                 "val":          this.handleVal,
             };
-            this.mouseX = 0;
-            this.mouseY = 0;
             // optional attributes
+            this.Angle( 0 );
             this.Width( 100 );
             this.Height( 50 );
             this.Color( 0, 100, 60 );
+         }
+        Angle( angle ){
+            this.angle = angle;
+            return this;
         }
         Width( width ){
             this.width = width;
@@ -402,6 +407,20 @@
                 this.height = -this.height;
             }
         }
+        getState() {
+            return {
+                x: this.x,
+                y: this.y,
+                angle: this.angle,
+                width: this.width,
+                height: this.height,
+                color: {
+                    hue: this.color.hue,
+                    sat: this.color.sat,
+                    val: this.color.val,
+                },
+            };
+        }
     }
     ////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////
@@ -413,10 +432,12 @@
     ////////////////////////////////////////////////////////////
     this.Affinity = {
         Canvas: Canvas,
+        Box: Box,
     };
 }());
 ////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////
-// log:
+// log: - make a class IO for saving and loading the canvas
+//      - map Ctrl + S, Ctrl + L with saving and loading
