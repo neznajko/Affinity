@@ -64,6 +64,12 @@
                 const key = e.key;
                 if( key == "PageUp" || key == "PageDown" ){
                     this._wheel( +( key == "PageUp" ));
+                } else if( key == "S" ){
+                    console.log( "Saving ......" );
+                    this.save();
+                } else if( key == "L" ){
+                    console.log( "Loading ......" );
+                    this.load();
                 } else {
                     if( this.toggle == CREATE ){
                         // figure out negative dimensions
@@ -164,6 +170,19 @@
             for( const box of this.stk ){
                 this.ctx.drawImage( box.render(), 0, 0 );
             }
+        }
+        save() {
+            // どうですか - How about ...?
+            if( this.stk.length == 0 ){ return; }
+            const a = [];
+            for( const box of this.stk ){
+                a.push( box.getState());
+            }
+            const json = JSON.stringify( a );
+            var blob = new Blob([ json ], { type: "application/json" });
+            saveAs( blob, "haHa.json" ); // FileSaver
+        }
+        load() {
         }
     }
     //////////////////////////////////////////////////////////

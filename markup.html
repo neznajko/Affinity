@@ -10,6 +10,9 @@
             overflow: hidden;
             border: 0;
         }
+        body {
+            background-color: hsl( 0, 10%, 8% );
+        }
         #myCanvas {
             display: block;
             background-color: hsl( 0, 0%, 0%);
@@ -17,11 +20,30 @@
     </style>
   </head>
   <body>
+    <input type="file"
+           id="fileInput"
+           onchange="readText(event)"
+           style="display: none;" />
     <canvas id="myCanvas"></canvas>
+    <script src="lib/FileSaver.js"></script>
     <script src="Affinity.js"></script>
     <script>
 //////////////////////////////////////////////////////////////
-        if( 0 ){
+        async function readText(event) {
+            const file = event.target.files.item(0)
+            const text = await file.text();
+            console.log( text );
+            event.target.value = ''; // allow reloading
+        }
+        if( 1 ){
+            var fileInput = document.getElementById('fileInput');
+            document.addEventListener('keypress', function(event) {
+                // Check if the pressed key is "L" or "l"
+                if (event.key === 'L' || event.key === 'l') {
+                    // Trigger the file input click event
+                    fileInput.click();
+                }
+            });
         } else {
             const canvas = new Affinity.Canvas( "myCanvas" );
             const box = new Affinity.Box( 100, 100, canvas );
@@ -31,7 +53,6 @@
                .Height( 250 );
             canvas.push( box );
             canvas.render();
-            console.log( JSON.stringify( box.getState()));
         }
     </script>
   </body>
