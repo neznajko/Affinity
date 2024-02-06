@@ -21,6 +21,7 @@
             this.canvas = document.getElementById( name );
             this.ctx = this.canvas.getContext( "2d" );
             this.stk = [];
+            this.io = new IO( this );
             this.fullScreen();
             // add Event Listeners
             this.onWheel();
@@ -65,11 +66,9 @@
                 if( key == "PageUp" || key == "PageDown" ){
                     this._wheel( +( key == "PageUp" ));
                 } else if( key == "S" ){
-                    console.log( "Saving ......" );
-                    this.save();
+                    this.io.save();
                 } else if( key == "L" ){
-                    console.log( "Loading ......" );
-                    this.load();
+                    this.io.load();
                 } else {
                     if( this.toggle == CREATE ){
                         // figure out negative dimensions
@@ -171,18 +170,8 @@
                 this.ctx.drawImage( box.render(), 0, 0 );
             }
         }
-        save() {
-            // どうですか - How about ...?
-            if( this.stk.length == 0 ){ return; }
-            const a = [];
-            for( const box of this.stk ){
-                a.push( box.getState());
-            }
-            const json = JSON.stringify( a );
-            var blob = new Blob([ json ], { type: "application/json" });
-            saveAs( blob, "haHa.json" ); // FileSaver
-        }
-        load() {
+        purge() { // clear the mess
+            this.stk.splice( 0, this.stk.length );
         }
     }
     //////////////////////////////////////////////////////////
@@ -254,6 +243,26 @@
     const INCROTATE = [ -STEPROTATE, STEPROTATE ];
     //////////////////////////////////////////////////////////
     class Box {
+        static cons( state, canvas ){
+            // しゅうまつ 週末 weekend
+            const box = new Box( state.x, state.y, canvas );
+            box.Angle( state.angle )
+               .Width( state.width )
+               .Height( state.height )
+               .Color( state.color.hue, 
+                       state.color.sat, 
+                       state.color.val );
+            return box;
+            // まつ end 末 マツ
+            // ////////======== 
+            // //            ==
+            // ///////  =======
+            // //            ==
+            // =====      /////
+            // ====  =  /  ////
+            // ===  ==  //  ///
+            // ========//////// 
+        }
         constructor( x, y, canvas ){
             this.x = x;
             this.y = y;
@@ -445,6 +454,44 @@
     ////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////
+    class IO {
+        constructor( canvas ){
+            this.canvas = canvas;
+            this.input = document.createElement( 'input' );
+            this.input.type = 'file';
+            this.input.style.display = 'none';
+            document.body.appendChild( this.input );
+            this.input.addEventListener( 'change', async e => {
+                const file = e.target.files.item( 0 );
+                this.render( await file.text());
+                e.target.value = ''; // allow reloading same file
+            });
+        }
+        render( json ){
+            this.canvas.purge();
+            for( const state of JSON.parse( json )){
+                this.canvas.push( Box.cons( state, this.canvas ));
+            }
+            this.canvas.render();
+        }
+        save() {
+            // どうですか - How about ...?
+            console.log( "Saving ......" );
+            if( this.canvas.stk.length == 0 ){ return; }
+            const a = [];
+            for( const box of this.canvas.stk ){
+                a.push( box.getState());
+            }
+            const json = JSON.stringify( a );
+            var blob = new Blob([ json ], { type: "application/json" });
+            saveAs( blob, "haHa.json" ); // FileSaver
+        }
+        load() {
+            // ちょっと - a little
+            console.log( "Loading ......" );
+            this.input.click();
+        }
+    }
     ////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////
@@ -458,5 +505,5 @@
 ////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////
-// log: - make a class IO for saving and loading the canvas
-//      - map Ctrl + S, Ctrl + L with saving and loading
+// log: - map R to Canvas.render
+//     

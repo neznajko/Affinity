@@ -46,3 +46,14 @@ The name of the program comes from the affine hull in math, it
 also sounds like infinity, when I've mention to GhatGPT about the
 name it was very excited, "That's a great name ..." repeating
 basically what I've said:)
+
+## OK
+Now there is Load and Save:
+
+ * S - Save, saves to browser's default directory 
+ * L - Load, opens up a dialog for loading the file
+
+File name is by convention called haHa.json( convetion over configuration ),
+for every new copy the browser automatically adds haHa(1).json, 
+haHa(2).json, etc., so no need to keep track of that, by the way 
+I'm not very sure that perspective shouldn't be drawn fyorst.

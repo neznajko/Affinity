@@ -20,39 +20,14 @@
     </style>
   </head>
   <body>
-    <input type="file"
-           id="fileInput"
-           onchange="readText(event)"
-           style="display: none;" />
-    <canvas id="myCanvas"></canvas>
+    <canvas id="mycanvas"></canvas>
     <script src="lib/FileSaver.js"></script>
     <script src="Affinity.js"></script>
     <script>
 //////////////////////////////////////////////////////////////
-        async function readText(event) {
-            const file = event.target.files.item(0)
-            const text = await file.text();
-            console.log( text );
-            event.target.value = ''; // allow reloading
-        }
-        if( 1 ){
-            var fileInput = document.getElementById('fileInput');
-            document.addEventListener('keypress', function(event) {
-                // Check if the pressed key is "L" or "l"
-                if (event.key === 'L' || event.key === 'l') {
-                    // Trigger the file input click event
-                    fileInput.click();
-                }
-            });
+        if( 0 ){
         } else {
-            const canvas = new Affinity.Canvas( "myCanvas" );
-            const box = new Affinity.Box( 100, 100, canvas );
-            box.Angle( 45 * Math.PI / 180 )
-               .Width( 500 )
-               .Color( 240, 50, 40 )
-               .Height( 250 );
-            canvas.push( box );
-            canvas.render();
+            const canvas = new Affinity.Canvas( "mycanvas" );
         }
     </script>
   </body>
