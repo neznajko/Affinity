@@ -53,7 +53,7 @@ Now there is Load and Save:
  * S - Save, saves to browser's default directory 
  * L - Load, opens up a dialog for loading the file
 
-File name is by convention called haHa.json( convetion over configuration ),
+File name is by convention called haHa.json( convention over configuration ),
 for every new copy the browser automatically adds haHa(1).json, 
 haHa(2).json, etc., so no need to keep track of that, by the way 
 I'm not very sure that perspective shouldn't be drawn fyorst.
