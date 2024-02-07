@@ -13,6 +13,22 @@
     const ROTATE = "r";
     const WIDTH =  "x";
     const HEIGHT = "y";
+    const SAVE =   "S";
+    const LOAD =   "L";
+    //////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////
+    const BOXEVENT = {
+        [HUE]:    "hue",
+        [SAT]:    "sat",
+        [VAL]:    "val",
+        [ROTATE]: "rotation",
+        [WIDTH]:  "width",
+        [HEIGHT]: "height",
+        get: function( key ){
+            return key in this ? this[ key ] : "scaling";
+        }
+    };
     //////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////
@@ -36,38 +52,24 @@
         getTopBox() {
             return this.stk[ this.stk.length - 1 ];
         }
-        _wheel( e ) {
-            const box = this.getTopBox();
-            if( this.toggle == HUE ){
-                box.handleEvent( "hue", e );     
-            } else if( this.toggle == SAT ){
-                box.handleEvent( "sat", e );
-            } else if( this.toggle == VAL ){
-                box.handleEvent( "val", e );
-            } else if( this.toggle == ROTATE ){
-                box.handleEvent( "rotation", e );
-            } else if( this.toggle == WIDTH ){
-                box.handleEvent( "width", e );
-            } else if( this.toggle == HEIGHT ){
-                box.handleEvent( "height", e );
-            } else {
-                box.handleEvent( "scaling", e );
-            }
+        handleWheel( e ) {
+            this.getTopBox()
+                .handleEvent( BOXEVENT.get( this.toggle ), e );
         }
         onWheel() {
             this.canvas.addEventListener( "wheel", e => {
                 // negative deltaY is wheel up
-                this._wheel( +( e.deltaY < 0 ));
+                this.handleWheel( +( e.deltaY < 0 ));
             });
         }
         onKeyDown() {
             document.addEventListener( "keydown", e => {
                 const key = e.key;
                 if( key == "PageUp" || key == "PageDown" ){
-                    this._wheel( +( key == "PageUp" ));
-                } else if( key == "S" ){
+                    this.handleWheel( +( key == "PageUp" ));
+                } else if( key == SAVE ){
                     this.io.save();
-                } else if( key == "L" ){
+                } else if( key == LOAD ){
                     this.io.load();
                 } else {
                     if( this.toggle == CREATE ){
@@ -227,7 +229,7 @@
     //////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////
-    const SCALEUP = 1.2;
+    const SCALEUP = 1.1;
     const SCALEDOWN = 1 / SCALEUP;
     //////////////////////////////////////////////////////////
     const STEPHUE = 10;
@@ -498,7 +500,6 @@
     ////////////////////////////////////////////////////////////
     this.Affinity = {
         Canvas: Canvas,
-        Box: Box,
     };
 }());
 ////////////////////////////////////////////////////////////////
@@ -506,4 +507,8 @@
 ////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////
 // log: - map R to Canvas.render
-//     
+//      + reduce scaling factor
+//      - allow for movement with arrow keys
+//      - map d to duplicate( or f to fork )
+//      - do the multiply
+//      - consider creating the canvas in the constructor
