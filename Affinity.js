@@ -39,6 +39,7 @@
             this.stk = [];
             this.io = new IO( this );
             this.fullScreen();
+            this.ctx.globalCompositeOperation = "multiply";
             // add Event Listeners
             this.onWheel();
             this.onKeyDown();
@@ -510,5 +511,5 @@
 //      + reduce scaling factor
 //      - allow for movement with arrow keys
 //      - map d to duplicate( or f to fork )
-//      - do the multiply
+//      + do the multiply
 //      - consider creating the canvas in the constructor
